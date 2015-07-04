@@ -1,0 +1,106 @@
+Author: Jose Gomez
+Nova Southeastern University
+July 3th 2015
+CISC 630
+Assignment 4
+
+Written Assignment 4
+1. (4.4.1) For each of the following grammars, devise predictive parsers and show the parsing tables. You may left-factor and/or eliminate left-recursion from your grammars first.
+
+a) S -> 0 S 1 | 0 1
+Extract left common factor:
+S -> 0 T
+T -> S 1 | 1
+
+Eliminate left-recursion:
+S -> 0 T
+T -> 0 T 1 | 1
+
+Parsing table:
+--------------------------------------------
+| Non-terminal | Input symbols             |
+-              -----------------------------
+|              | 0           | 1       | $ |
+--------------------------------------------
+| S            | S -> 0 T    |         |   |
+--------------------------------------------
+| T            | T -> 0 T 1  | T -> 1  |   |
+--------------------------------------------
+
+b) S -> + S S | * S S | a
+Parsing table:
+----------------------------------------------------------
+| Non-terminal | Input symbols                       |   |
+-              -------------------------------------------
+|              | +           | *           | a       | $ |
+----------------------------------------------------------
+| S            | S -> + S S  | S -> * S S  | S -> a  |   |
+----------------------------------------------------------
+
+c) S -> S ( S ) S | epsilon
+Eliminate left-recursion:
+S -> T
+T -> ( S ) S T | epsilon
+
+Parsing table:
+------------------------------------------------------
+| Non-terminal | Input symbols                       |
+-              ---------------------------------------
+|              | (               | )       | $       |
+------------------------------------------------------
+| S            | S -> T          | S -> T  | S -> T  |
+------------------------------------------------------
+| T            | T -> ( S ) S T  | T -> e  | T -> e  |
+|              | T -> e          |         |         |
+------------------------------------------------------
+
+2. (4.4.3) Computer FIRST and FOLLOW for the grammar of Exercise 4.2.1.
+S -> S S + | S S * | a
+FIRST(S) = { a }
+FOLLOW(S) = { a, +, * }
+
+3. (4.5.1) For the grammar S -> 0 S 1 | 0 1, show the rightmost derivation for sentential forms (a) and (b) and underline the handles in each form.
+
+a) 000111
+Rightmost derivation:
+S -> 0S1 -> 00S11 -> 000111
+
+Handle: 01
+
+b) 00S11
+Rightmost derivation:
+S -> 0S1 -> 00S10
+
+Handle: 0S1
+
+4. (4.5.2) For the grammar S -> S S + | S S * | a, show the rightmost derivation for sentential forms (a), (b) and (c) and underline the handles in each form.
+
+a) SSS+a*+
+Rightmost derivation:
+S -> SS+ -> SSS*+ -> SSa*+ -> SSS+a*+
+
+Handle: SS+
+
+b) SS+a*a+
+Rightmost derivation:
+S -> SS+ -> Sa+ -> SS*a+ -> Sa*a+ -> SS+a*a+
+
+Handle: SS+
+
+c) aaa*a++
+Rightmost derivation:
+S -> SS+ -> SSS++ -> SSa++ -> SSS*a++ -> SSa*a++ -> Saa*a++ aaa*a++
+
+Handle: a
+
+5. (4.5.3) Give bottom-up parses for the following input strngs and grammars:
+
+a) The input 000111 according to the grammar of Exercise 4.5.1.
+S -> 0 S 1 | 0 1
+
+
+b) The input aaa*a++ according to the grammar of Exercise 4.5.2.
+S -> S S + | S S * | a
+
+References
+Aho, A., Lam, M., Sethi, R., & Ullman, J. (2007). Compilers Principles, Techniques, &amp; Tools Gradiance (2nd ed.). Boston, MA: Addison-Wesley.
