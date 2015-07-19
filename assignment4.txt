@@ -1,6 +1,6 @@
 Author: Jose Gomez
 Nova Southeastern University
-July 3th 2015
+July 3rd 2015
 CISC 630
 Assignment 4
 

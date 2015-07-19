@@ -10,8 +10,11 @@ expr: DOUBLE # double
     | '(' 'print' expr ')' # printexpr
     | '(' 'while' expr expr ')' # wloopexpr
     | '(' 'begin' expr+ ')' #blockexpr
+    | '(' 'let' letvector expr ')' #letexpr
     | ID # refvar
     ;
+letvector: '[' (ID expr)+ ']'
+         ;
 
 RATOR: ARITHMETIC_OP | RELATIONAL_OP | BOOLEAN_OP ; 
 ARITHMETIC_OP: '^' | '*' | '/' | '+' | '-' ;

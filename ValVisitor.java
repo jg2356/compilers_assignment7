@@ -1,24 +1,41 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class ValVisitor extends SchemeBaseVisitor<Val> {
-    private Map<String, Val> variables;
+    private Stack<Map<String, Val>> stack;
 
-    public ValVisitor()
-    {
-        variables = new HashMap<String, Val>();
+    public ValVisitor() {
+        stack = new Stack<Map<String, Val>>();
+        stack.push(new HashMap<String, Val>());
     }
+
+    private Val getVar(String id) {
+        Val value = null;
+        for(int i = stack.size(); i > 0; i--) {    
+            Map<String, Val> variables = stack.get(i - 1);
+            value = variables.get(id);
+            if (value != null) break;
+        }
+        return value;
+    }
+
+    private void setVar(String id, Val value) {
+        Map<String, Val> variables = stack.peek();
+        variables.put(id, value);
+    }
+    
 
     @Override public Val visitDefvar(SchemeParser.DefvarContext ctx) {
         String id = ctx.ID().getText();
         Val value = visit(ctx.expr());
-        variables.put(id, value);
+        setVar(id, value);
         return value;
     }
 
-    @Override public Val visitRefvar(SchemeParser.RefvarContext ctx) { 
+    @Override public Val visitRefvar(SchemeParser.RefvarContext ctx) {
         String id = ctx.ID().getText();
-        Val value = variables.get(id);
+        Val value = getVar(id);
         if (value == null)
             throw new RuntimeException(id + " is not defined.");
         return value;
@@ -59,19 +76,36 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
     }
 
     @Override public Val visitWloopexpr(SchemeParser.WloopexprContext ctx) {
-    	Val result = new Val(0D);
-    	while(visit(ctx.expr(0)).getBoolean()) {
-    		result = visit(ctx.expr(1));
-    	}
+        Val result = new Val(0D);
+        while(visit(ctx.expr(0)).getBoolean()) {
+            result = visit(ctx.expr(1));
+        }
         return result;
     }
-   
+
     @Override public Val visitBlockexpr(SchemeParser.BlockexprContext ctx) {
         Val result = null;
         for(SchemeParser.ExprContext ectx : ctx.expr()) {
             result = visit(ectx);
         }
         return result;
+    }
+
+    @Override public Val visitLetexpr(SchemeParser.LetexprContext ctx) {
+    	stack.push(new HashMap<String, Val>());
+    	visit(ctx.letvector());
+    	Val result = visit(ctx.expr());
+    	stack.pop();
+        return result;
+    }
+
+    @Override public Val visitLetvector(SchemeParser.LetvectorContext ctx) {
+    	for(int i = 0; i < ctx.ID().size(); i++) {
+    		String id = ctx.ID(i).getText();
+    		Val value = visit(ctx.expr(i));
+    		setVar(id, value);
+    	}
+        return null;
     }
 
     @Override public Val visitOpexpr(SchemeParser.OpexprContext ctx) {
@@ -100,8 +134,7 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
                         result = 1.0;
                     }
                     for (SchemeParser.ExprContext expr : ctx.expr()) {
-                        if (result == null)
-                        {
+                        if (result == null) {
                             result = visit(expr).getDouble();
                             continue;
                         }
@@ -118,8 +151,7 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
                         result = 1.0;
                     }
                     for (SchemeParser.ExprContext expr : ctx.expr()) {
-                        if (result == null)
-                        {
+                        if (result == null) {
                             result = visit(expr).getDouble();
                             continue;
                         }                        
@@ -136,8 +168,7 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
                         result = 0.0;
                     }
                     for (SchemeParser.ExprContext expr : ctx.expr()) {
-                        if (result == null)
-                        {
+                        if (result == null) {
                             result = visit(expr).getDouble();
                             continue;
                         }                    
@@ -175,8 +206,7 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
                     Boolean result = true;
                     Object pvalue = null;
                     for (SchemeParser.ExprContext expr : ctx.expr()) {
-                        if (pvalue == null)
-                        {
+                        if (pvalue == null) {
                             pvalue = visit(expr).getValue();
                             continue;
                         }
@@ -192,8 +222,7 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
                     Boolean result = true;
                     Double pvalue = null;
                     for (SchemeParser.ExprContext expr : ctx.expr()) {
-                        if (pvalue == null)
-                        {
+                        if (pvalue == null) {
                             pvalue = visit(expr).getDouble();
                             continue;
                         }
@@ -208,8 +237,7 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
                     Boolean result = true;
                     Double pvalue = null;
                     for (SchemeParser.ExprContext expr : ctx.expr()) {
-                        if (pvalue == null)
-                        {
+                        if (pvalue == null) {
                             pvalue = visit(expr).getDouble();
                             continue;
                         }
