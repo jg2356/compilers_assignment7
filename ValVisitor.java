@@ -145,13 +145,24 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
 		return result;
 	}
 	
-	@Override public Val visitTryCatchExpr(SchemeParser.TryCatchExprContext ctx) {
+	@Override public Val visitTryExpr(SchemeParser.TryExprContext ctx) {
 		try {
 			return visit(ctx.expr(0));
 		}
-		catch (Exception e) {
-			return visit(ctx.expr(1));
+		catch (SchemeException se) {
+			for(int i = 0; i < ctx.ID().size(); i++) {
+				String id = ctx.ID(i).getText();
+				if (id.equals(se.getMessage())) {
+					return visit(ctx.expr(i + 1));
+				}
+			}
+			throw se;
 		}
+	}
+	
+	@Override public Val visitRaiseExpr(SchemeParser.RaiseExprContext ctx) {
+		String id = ctx.ID().getText();
+		throw new SchemeException(id);
 	}
 
     @Override public Val visitOpExpr(SchemeParser.OpExprContext ctx) {

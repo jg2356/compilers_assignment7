@@ -14,7 +14,7 @@ expr: DOUBLE # Double
     | '(' 'fun' ID+ expr ')' # FuncExpr
     | '(' 'defun' ID ID+ expr ')' # DefFuncExpr
     | '(' 'call' expr expr+ ')' # CallExpr
-    | '(' 'try' expr 'catch' (ID expr)+ ')' # TryCatchExpr
+    | '(' 'try' expr (ID expr)+ ')' # TryExpr
     | '(' 'raise' ID ')' # RaiseExpr
     | ID # RefExpr
     ;
