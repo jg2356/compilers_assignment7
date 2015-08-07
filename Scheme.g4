@@ -2,19 +2,24 @@ grammar Scheme;
 
 prog: expr+
     ;
-expr: DOUBLE # double
-    | BOOLEAN # boolean
-    | '(' RATOR expr* ')' # opexpr
-    | '(' 'def' ID expr ')' # defvar
-    | '(' 'if' expr expr expr ')' # ifexpr
-    | '(' 'print' expr ')' # printexpr
-    | '(' 'while' expr expr ')' # wloopexpr
-    | '(' 'begin' expr+ ')' #blockexpr
-    | '(' 'let' letvector expr ')' #letexpr
-    | ID # refvar
+expr: DOUBLE # Double
+    | BOOLEAN # Boolean
+    | '(' RATOR expr* ')' # OpExpr
+    | '(' 'def' ID expr ')' # DefExpr
+    | '(' 'if' expr expr expr ')' # IfExpr
+    | '(' 'print' expr ')' # PrintExpr
+    | '(' 'while' expr expr ')' # WhileExpr
+    | '(' 'begin' expr+ ')' # BlockExpr
+    | '(' 'let' bind expr ')' # LetExpr
+    | '(' 'fun' ID+ expr ')' # FuncExpr
+    | '(' 'defun' ID ID+ expr ')' # DefFuncExpr
+    | '(' 'call' expr expr+ ')' # CallExpr
+    | '(' 'try' expr 'catch' (ID expr)+ ')' # TryCatchExpr
+    | '(' 'raise' ID ')' # RaiseExpr
+    | ID # RefExpr
     ;
-letvector: '[' (ID expr)+ ']'
-         ;
+bind: '[' (ID expr)+ ']'
+    ;
 
 RATOR: ARITHMETIC_OP | RELATIONAL_OP | BOOLEAN_OP ; 
 ARITHMETIC_OP: '^' | '*' | '/' | '+' | '-' ;
