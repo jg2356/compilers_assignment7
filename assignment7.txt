@@ -1,3 +1,214 @@
+Author: Jose Gomez
+Nova Southeastern University
+July 31st 2015
+CISC 630
+Assignment 7
+
+Programming Exercise
+
+- Semantics for multi-argument function definition and calls
+(call (fun n1 n2 (* n1 n2)) 4 5) 
+=> 20.0
+
+- Semantics for multi-argument let declarations
+(let [n1 5
+      n2 6]
+  (* n1 n2)) 
+=> 30.0
+
+- Semantics for naming and defining new functions in a single expression.
+(defun volume s1 s2 s3 (* s1 s2 s3)) 
+=> <fun>
+(call volume 2 3 4) 
+=> 24.0
+
+- Add constructs for raising and handling exceptions.
+(begin (raise SillyError) (+ 2 3)) 
+=> <SillyError>
+(try (raise SillyError1)
+  SillyError2 (+ 2 3)) 
+=> <SillyError1>
+(try (raise SillyError1)
+  SillyError1 (+ 2 3)) 
+=> 5.0
+- Added exception handling and `(quit)` expression to exit the repl.
+(quit)
+=> <quit>
+(+ 2 2)
+(quit)
+=> 4.0
+=> <quit>
+
+Scheme.g4:
+grammar Scheme;
+
+prog: expr+
+    ;
+expr: DOUBLE # Double
+    | BOOLEAN # Boolean
+    | '(' RATOR expr* ')' # OpExpr
+    | '(' 'def' ID expr ')' # DefExpr
+    | '(' 'if' expr expr expr ')' # IfExpr
+    | '(' 'print' expr ')' # PrintExpr
+    | '(' 'while' expr expr ')' # WhileExpr
+    | '(' 'begin' expr+ ')' # BlockExpr
+    | '(' 'let' bind expr ')' # LetExpr
+    | '(' 'fun' ID+ expr ')' # FuncExpr
+    | '(' 'defun' ID ID+ expr ')' # DefFuncExpr
+    | '(' 'call' expr expr+ ')' # CallExpr
+    | '(' 'try' expr (ID expr)+ ')' # TryExpr
+    | '(' 'raise' ID ')' # RaiseExpr
+    | '(' 'quit' ')' # QuitExpr
+    | ID # RefExpr
+    ;
+bind: '[' (ID expr)+ ']'
+    ;
+RATOR: ARITHMETIC_OP | RELATIONAL_OP | BOOLEAN_OP ; 
+ARITHMETIC_OP: '^' | '*' | '/' | '+' | '-' ;
+RELATIONAL_OP: '=' | '>' | '<' ;
+BOOLEAN_OP: '&' | '|' | '!' ;
+BOOLEAN: 'true' | 'false' ;
+DOUBLE: ('-')? DIGIT+ ( '.' DIGIT+)? ;
+ID: LETTER (LETTER|DIGIT|'_')* ;
+WS: [ \t\r\n] -> skip ;
+fragment
+ DIGIT: [0-9] ;
+fragment
+ LETTER: [a-zA-Z] ;
+
+Environment.java:
+import java.util.HashMap;
+
+public class Environment {
+	private Environment parent;
+	private HashMap<String, Val> symbols;
+	
+	public Environment(Environment parent) {
+		this.parent = parent;
+		this.symbols = new HashMap<String, Val>();
+	}
+	
+	public Environment getParent() {
+		return this.parent;
+	}
+	
+	public void set(String id, Val value) {
+		symbols.put(id, value);
+	}
+	
+	public Val get(String id) {
+		Val result = symbols.get(id);
+		if (result == null
+				&& parent != null) {
+			result = parent.get(id);
+		}
+		return result;
+	}
+}
+
+Function.java:
+import java.util.List;
+
+public class Function {
+	private List<String> args;
+	private SchemeParser.ExprContext expr;
+	
+	public Function(List<String> args, SchemeParser.ExprContext expr) {
+		this.args = args;
+		this.expr = expr;
+	}
+	
+	public List<String> args() {
+		return this.args;
+	}
+	
+	public SchemeParser.ExprContext expr() {
+		return this.expr;
+	}
+	
+	public String toString() {
+		return "<fun>";
+	}
+}
+
+Val.java:
+public class Val {
+    private Object value;
+    
+    public Val(Object value) {
+    	this.value = value;
+    }
+
+    public <T> T get(Class<T> t) {
+    	Class<?> vt = value.getClass();    
+    	if (!t.isAssignableFrom(vt))
+    		throw new RuntimeException(
+                    "Type mismatch: expected "
+                    + t.getName()
+                    + " instead of "
+                    + vt.getName());
+    	return t.cast(value);
+    }
+      
+    public Object get() {
+    	return value;
+    }
+}
+
+SchemeException.java:
+public class SchemeException extends RuntimeException {
+	public SchemeException(String message) {
+		super(message);
+	}
+
+    public String toString() {
+        return "<" + getMessage() + ">";
+    }
+}
+
+SchemeQuitException.java:
+public class SchemeQuitException extends RuntimeException {
+}
+
+Scheme.java:
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Scanner;
+import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
+
+public class Scheme {
+    private static Scanner getScanner() {
+        Scanner scanner = new Scanner(System.in);
+        Pattern delim = Pattern.compile("( \r?\n)|(\r?\n){2}");
+        scanner.useDelimiter(delim);
+        return scanner;
+    }
+
+    public static void main(String[] args) throws Exception {
+        ValVisitor eval = new ValVisitor();
+        Scanner scanner = getScanner();
+        while (!eval.isDone()) {
+            try {
+                String src = scanner.next();
+                ANTLRInputStream input = new ANTLRInputStream(src);
+                SchemeLexer lexer = new SchemeLexer(input);
+                CommonTokenStream tokens = new CommonTokenStream(lexer);
+                SchemeParser parser = new SchemeParser(tokens);
+                ParseTree tree = parser.prog();
+                eval.visit(tree);
+            }
+            catch (NoSuchElementException ee) {
+                break;
+            }
+        }
+    }
+}
+
+ValVisitor.java:
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

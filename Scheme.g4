@@ -16,11 +16,11 @@ expr: DOUBLE # Double
     | '(' 'call' expr expr+ ')' # CallExpr
     | '(' 'try' expr (ID expr)+ ')' # TryExpr
     | '(' 'raise' ID ')' # RaiseExpr
+    | '(' 'quit' ')' # QuitExpr
     | ID # RefExpr
     ;
 bind: '[' (ID expr)+ ']'
     ;
-
 RATOR: ARITHMETIC_OP | RELATIONAL_OP | BOOLEAN_OP ; 
 ARITHMETIC_OP: '^' | '*' | '/' | '+' | '-' ;
 RELATIONAL_OP: '=' | '>' | '<' ;

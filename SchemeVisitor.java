@@ -115,6 +115,13 @@ public interface SchemeVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRaiseExpr(SchemeParser.RaiseExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code QuitExpr}
+	 * labeled alternative in {@link SchemeParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitQuitExpr(SchemeParser.QuitExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code RefExpr}
 	 * labeled alternative in {@link SchemeParser#expr}.
 	 * @param ctx the parse tree
