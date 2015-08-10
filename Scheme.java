@@ -1,8 +1,6 @@
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Scanner;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
