@@ -44,14 +44,17 @@ public class ValVisitor extends SchemeBaseVisitor<Val> {
         catch (SchemeException se) {
             result = new Val(se);
             output(result);
+            return result;
         }
         catch (SchemeQuitException qe) {
             output(result);
             output(new Val("<quit>"));
+            return result;
         }
         catch (Exception ee) {
             ee.printStackTrace();
         }
+        output(result);
         return result;
     }
 

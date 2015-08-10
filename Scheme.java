@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Scheme {
     private static Scanner getScanner() {
         Scanner scanner = new Scanner(System.in);
-        Pattern delim = Pattern.compile("( \r?\n)|(\r?\n){2}");
+        Pattern delim = Pattern.compile(" \r?\n");
         scanner.useDelimiter(delim);
         return scanner;
     }
